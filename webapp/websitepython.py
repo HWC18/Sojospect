@@ -513,7 +513,11 @@ def download_pdf(datecheck):
         file.write(html_output)
 
     # Set the path to wkhtmltopdf executable file
-    path_wkhtmltopdf = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"  # This may vary depending on your system
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Construct the path to wkhtmltopdf.exe
+    path_wkhtmltopdf = os.path.join(script_dir, "wkhtmltopdf", "bin", "wkhtmltopdf.exe")
+
     config = pdf.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
     # Get the current date and time
