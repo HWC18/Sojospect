@@ -101,6 +101,37 @@ CREATE TABLE IF NOT EXISTS vulnerabilities (
 )
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS low_severity (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    Vulnerability VARCHAR(255),
+    Description VARCHAR(400),
+    Solution VARCHAR(400)
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS medium_severity (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    Vulnerability VARCHAR(255),
+    Description VARCHAR(400),
+    Solution VARCHAR(400)
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS critical_severity (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    Vulnerability VARCHAR(255),
+    Description VARCHAR(400),
+    Solution VARCHAR(400)
+)
+""")
+
+
+
+
+
 # Check if 'users' table is empty
 cursor.execute("SELECT COUNT(*) FROM users")
 user_count = cursor.fetchone()[0]
@@ -436,10 +467,6 @@ def download_pdf(datecheck):
 
 
 
-    # Execute a query to fetch the table data
-    query = 'SELECT `Action to Take`, Description FROM actions'
-    cursor.execute(query)
-
     # Fetch column names from the cursor description
     column_names = [desc[0] for desc in cursor.description]
 
@@ -453,20 +480,8 @@ def download_pdf(datecheck):
     # print(data_header)
     # print(data_tuple)
 
-    # Generate the HTML table content
-    actions = '<table style="border:none;border-collapse:collapse;"><tbody>  '
-    actions += '<tr style="height:0pt;" >'
-    for column in column_names:
-        actions += f'<td style="border-left:solid #000000 0.5pt;border-right:solid #000000 0.5pt;border-bottom:solid #000000 0.5pt;border-top:solid #000000 0.5pt;vertical-align:top;padding:0pt 5.4pt 0pt 5.4pt;overflow:hidden;overflow-wrap:break-word;background-color:#e7e6e6;"><p dir="ltr" style="line-height:1.2;margin-top:0pt;margin-bottom:0.1pt;"><span style="font-size: 30px; font-family: Calibri, sans-serif; color: rgb(0, 0, 0); background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">{column}</span></p></td>'
-    actions += '</tr>'
 
-    for row in rows:
-        actions += '<tr>'
-        for value in row:
-            actions += f'<td style="border-left:solid #000000 0.5pt;border-right:solid #000000 0.5pt;border-bottom:solid #000000 0.5pt;border-top:solid #000000 0.5pt;vertical-align:top;padding:0pt 5.4pt 0pt 5.4pt;overflow:hidden;overflow-wrap:break-word;"><p dir="ltr" style="line-height:1.2;margin-top:0pt;margin-bottom:0.1pt;"><span style="font-size: 30px; font-family: Calibri, sans-serif; color: rgb(0, 0, 0); background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap; ">{value}</span></p></td>'
-        actions += '</tr>'
 
-    actions += '</tbody></table>'
     username = session['username']
     scanned = "Scanned by: " + username
     datetdy = today.strftime("%d/%m/%Y")
@@ -479,7 +494,7 @@ def download_pdf(datecheck):
 
     if latest_id is None:
         # Handle case where no data is found
-        latest_url = None
+        latest_url = ""
     else:
         latest_id = latest_id[0]
 
@@ -491,7 +506,7 @@ def download_pdf(datecheck):
     with open(".\\templates\\Report.html", 'r') as file:
         html_template = file.read()
     # Replace a placeholder in the template with the generated table content
-    html_output = html_template.replace('{{omitted}}', omitted).replace('{{reporturl}}', latest_url).replace('{{lowcount}}', str(lowcount)).replace('{{mediumcount}}', str(mediumcount)).replace('{{highcount}}', str(highcount)).replace('{{table_content}}', table_content).replace('{{critical_severity}}', critical_severity).replace('{{medium_severity}}', medium_severity).replace('{{low_severity}}', low_severity).replace('{{actions}}', actions).replace('{{scanned_by}}', scanned).replace('{{date}}', datetdy).replace('{{version}}', sj_version)
+    html_output = html_template.replace('{{omitted}}', omitted).replace('{{reporturl}}', latest_url).replace('{{lowcount}}', str(lowcount)).replace('{{mediumcount}}', str(mediumcount)).replace('{{highcount}}', str(highcount)).replace('{{table_content}}', table_content).replace('{{critical_severity}}', critical_severity).replace('{{medium_severity}}', medium_severity).replace('{{low_severity}}', low_severity).replace('{{scanned_by}}', scanned).replace('{{date}}', datetdy).replace('{{version}}', sj_version)
 
     # Write the final HTML output to a file
     with open(".\\templates\\Output.html", 'w') as file:
@@ -504,7 +519,13 @@ def download_pdf(datecheck):
     # Get the current date and time
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
     user = session['username']
-    pdf_file_name = f'report_{current_datetime}_scanned_by_{user}.pdf'
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+
+    # Update pdf_file_name to include the pdf folder in the path
+    pdf_folder_path = os.path.join(script_directory, 'pdfs')
+    os.makedirs(pdf_folder_path, exist_ok=True)  # Create the pdf folder if it doesn't exist
+
+    pdf_file_name = os.path.join(pdf_folder_path, f'report_{current_datetime}_scanned_by_{user}.pdf')
 
     pdf.from_file('.\\templates\\Output.html', pdf_file_name, configuration=config)
 
@@ -673,6 +694,9 @@ def process_input():
         # Insert a row with "None" severity and "No vulnerability" type
         cursor.execute("INSERT INTO vulnerabilities (Severity, `Vulnerability Type`, url, `Checked at`) VALUES (%s, %s, %s, %s)",
                        ("None", "No vulnerabilities found!", input_data, current_datetime))
+        
+    db_connection.commit()
+    db.commit()
 
     download_pdf(current_datetime)
 
