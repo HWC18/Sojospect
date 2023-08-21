@@ -1,9 +1,0 @@
-flask
-selenium
-beautifulsoup4
-mysql-connector-python
-xhtml2pdf
-pdfkit
-scrapy
-requests
-urlextract

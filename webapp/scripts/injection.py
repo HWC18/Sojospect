@@ -53,7 +53,7 @@ def trypass(password,idlist,username,edgeBrowser):
 
     sampleElement.send_keys(Keys.ENTER)
 def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
-        vulns = ""
+        vulns = []
         
         page_source = edgeBrowser.page_source
         soup = BeautifulSoup(page_source, features="html.parser")
@@ -190,7 +190,7 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
             print(url2)
             if url2==f"{loginurl}":
                 trypass(password,loginfield,username,edgeBrowser)
-                sleep(0.1)
+                sleep(1)
                 print('fail')
                 data=[url,payload,'fail']
                 print(data)
@@ -206,6 +206,7 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                         data=[url,payload,'fail']
                         print(data)
                     else:
+                        vulns.append(url)
                         message=[soup3.find('div',class_='ui info message')]
                         if message!=[None]:
                             print(len(message[0].text))
@@ -213,9 +214,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                             if len(message[0].text)==129:
                                 print('pass')
                                 data=[url,payload,'vulnerability']
-                                vulns += str(data) + "\n"
+                                
 
                                 print(data)
+                                return data
                             elif len(message[0].text)==66:
                                 print('fail')
                                 data=[url,payload,'fail']
@@ -223,9 +225,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                             else:
                                 print('pass')
                                 data=[url,payload,'vulnerability']
-                                vulns += str(data) + "\n"
+                                
                                 
                                 print(data)
+                                return data
                         else:
                             addchild=soup3.find_all('h1',string=re.compile(f'Add Child Newcomer'))      
                             if addchild !=[]:  
@@ -233,9 +236,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                                 if addchildsearch==[]:
                                     print('pass')
                                     data=[url,payload,'vulnerability']
-                                    vulns += str(data) + "\n"
+                                    
 
                                     print(data)
+                                    return data
                                 else:
                                     print('fail')
                                     data=[url,payload,'fail']
@@ -257,9 +261,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                                     if cellgroupsearch==[]:
                                         print('pass')
                                         data=[url,payload,'vulnerability']
-                                        vulns += str(data) + "\n"
+                                    
 
                                         print(data)
+                                        return data
                                     else:
                                         print('fail')
                                         data=[url,payload,'fail']
@@ -282,10 +287,8 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                     else:
                         print('pass')
                         data=[url,payload,'vulnerability']
-                        vulns += str(data) + "\n"
-
                         print(data)
-                    
+                        return data
         #For pages with selection fields
         payload1=payload
         if inputfield !=[] and inputfield2!=[]:
@@ -306,7 +309,7 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                     clcik=field.find_element(By.CLASS_NAME,"item")
                     #Select the first option
                     if clcik.is_displayed():
-                        sleep(0.1)
+                        sleep(1)
                         clcik.click()
             if dates!=[]:
                  for i in dates:
@@ -367,9 +370,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                         if len(message[0].text)==129:
                             print('pass')
                             data=[url,payload,'vulnerability']
-                            vulns += str(data) + "\n"
+                            
 
                             print(data)
+                            return data
                         elif len(message[0].text)==66:
                                 print('fail')
                                 data=[url,payload,'fail']
@@ -385,9 +389,10 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                                 if addchildsearch==[]:                     
                                     print('pass')
                                     data=[url,payload,'vulnerability']
-                                    vulns += str(data) + "\n"
+                                    
 
                                     print(data)
+                                    return data
                                 else:
                                     print('fail')
                                     data=[url,payload,'fail']
@@ -411,9 +416,9 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                                     if cellgroupsearch==[]:
                                         print('pass')
                                         data=[url,payload,'vulnerability']
-                                        vulns += str(data) + "\n"
 
                                         print(data)
+                                        return data
                                     else:
                                         print('fail')
                                         data=[url,payload,'fail']
@@ -436,8 +441,11 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                 else:
                     data=[url,payload,'vulnerability']
                     print(data)
-
-        return vulns
+                    return data
+                
+        vulns = str(vulns)  # Convert vulns to a string if it's not already
+        vulns = vulns.replace("[]", "")
+        return vulns.strip('\n')
     
 url = user_input
 
@@ -470,33 +478,9 @@ edgeBrowser.get(url)
 loginurl=edgeBrowser.current_url
 
 
-vulns = trypass(password,loginfield,username,edgeBrowser)
+trypass(password,loginfield,username,edgeBrowser)
 
-if vulns != None:
-    # Get values from the config file
-    db_host = config.get('SQL Database', 'db_host')
-    db_user = config.get('SQL Database', 'db_user')
-    db_password = config.get('SQL Database', 'db_password')
 
-    db_connection = mysql.connector.connect(
-    host=db_host,
-    user=db_user,
-    password=db_password,
-    database="vulnerabilities"
-    )
-
-    db_cursor = db_connection.cursor()
-    # Insert a row into the MySQL table
-    vulnerability = "Injection"
-    description = vulns
-    solution = "Implement stronger password policies and account lockout mechanisms"
-    insert_query = "INSERT INTO critical_severity (Vulnerability, Description, Solution) VALUES (%s, %s, %s)"
-    values = (vulnerability, description, solution)
-    db_cursor.execute(insert_query, values)
-    db_connection.commit()
-
-    db_cursor.close()
-    db_connection.close()
 
 page_source = edgeBrowser.page_source
 #,
@@ -513,13 +497,40 @@ inject=[]
 for i in urllist:
     if i !='':
         inject.append(f'{i}')
-
+vulnerabilitylist=""
 for url in inject:
     for payload in xsslist:
         print(url)
         edgeBrowser.get(url)
         wait = WebDriverWait(edgeBrowser, 10)
         wait.until(EC.url_to_be(url))
-        skip=injection(edgeBrowser,payload,url,username,password,loginfield,loginurl)
+        skip= injection(edgeBrowser,payload,url,username,password,loginfield,loginurl)
         if skip ==1:
             break
+        elif skip != None:
+            vulnerabilitylist += str(skip) + "\n"
+if vulnerabilitylist !="":
+    # Get values from the config file
+    db_host = config.get('SQL Database', 'db_host')
+    db_user = config.get('SQL Database', 'db_user')
+    db_password = config.get('SQL Database', 'db_password')
+
+    db_connection = mysql.connector.connect(
+    host=db_host,
+    user=db_user,
+    password=db_password,
+    database="vulnerabilities"
+    )
+
+    db_cursor = db_connection.cursor()
+    # Insert a row into the MySQL table
+    vulnerability = "Injection"
+    description = vulnerabilitylist
+    solution = "Use positive server-side input validation and a a safe API, which avoids using the interpreter entirely, provides a parameterized interface, or migrates to Object Relational Mapping Tools (ORMs)."
+    insert_query = "INSERT INTO medium_severity (Vulnerability, Description, Solution) VALUES (%s, %s, %s)"
+    values = (vulnerability, description, solution)
+    db_cursor.execute(insert_query, values)
+    db_connection.commit()
+
+    db_cursor.close()
+    db_connection.close()

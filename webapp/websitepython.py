@@ -105,7 +105,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS low_severity (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Vulnerability VARCHAR(255),
-    Description VARCHAR(400),
+    Description TEXT,
     Solution VARCHAR(400)
 )
 """)
@@ -114,7 +114,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS medium_severity (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Vulnerability VARCHAR(255),
-    Description VARCHAR(400),
+    Description TEXT,
     Solution VARCHAR(400)
 )
 """)
@@ -123,7 +123,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS critical_severity (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Vulnerability VARCHAR(255),
-    Description VARCHAR(400),
+    Description TEXT,
     Solution VARCHAR(400)
 )
 """)
