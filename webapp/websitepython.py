@@ -575,6 +575,8 @@ def execute_script(user_input):
     config = configparser.ConfigParser()
     config.read('config.ini')
 
+    subprocess.run(['python', 'scripts/before_profile.py'])
+
     for script in scripts:
         script_path = scripts_folder + script
         setting_name = script.split('.')[0]  # Extract the script name without the extension
@@ -587,7 +589,7 @@ def execute_script(user_input):
     for process in processes:
         process.wait()
 
-
+    subprocess.run(['python', 'scripts/after_profile.py'])
     result = 'Scripts executed successfully.'
     return result
 

@@ -14,7 +14,11 @@ import select
 delete_button=[]
 remove_button=[]
 
-# Detect available web browsers and create a webdriver
+config = configparser.ConfigParser()
+config.read("config.ini")
+username = config.get('Advanced Scan Settings','scraping_username')
+password = config.get('Advanced Scan Settings','scraping_password')
+
 def create_webdriver():
     try:
         # Try creating a Chrome webdriver
@@ -35,11 +39,6 @@ def create_webdriver():
                 raise Exception("No suitable browser found")
 
 edgeBrowser = create_webdriver()
-
-config = configparser.ConfigParser()
-config.read("config.ini")
-username = config.get('Advanced Scan Settings','scraping_username')
-password = config.get('Advanced Scan Settings','scraping_password')
 
 driver = edgeBrowser
 url = "https://chmsdemo.greenfossil.com/"

@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,7 +14,6 @@ input_urls = []
 delete_button = []
 test_input = 'This is a test'
 
-# Detect available web browsers and create a webdriver
 def create_webdriver():
     try:
         # Try creating a Chrome webdriver
