@@ -10,6 +10,7 @@ from time import sleep
 import re
 import configparser
 import select
+from selenium.webdriver.edge.options import Options
 
 delete_button=[]
 remove_button=[]
@@ -23,18 +24,21 @@ def create_webdriver():
     try:
         # Try creating a Chrome webdriver
         chrome_options = Options()
-        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("headless")
         return webdriver.Chrome(options=chrome_options)
     except:
         try:
             # Try creating a Firefox webdriver
             firefox_options = webdriver.FirefoxOptions()
-            firefox_options.add_argument("--start-maximized")
+            firefox_options.add_argument("headless") 
             return webdriver.Firefox(options=firefox_options)
         except:
             try:
                 # Try creating an Edge webdriver
-                return webdriver.Edge(r"msedgedriver.exe")
+                options = Options()
+                options.use_chromium = True
+                options.add_argument("headless")
+                return webdriver.Edge(options=options)
             except:
                 raise Exception("No suitable browser found")
 
@@ -75,14 +79,20 @@ def delete():
                         xpath = '//form[@action="'+str(action_value)+'"]/button[@class="ui right floated icon tertiary button red deleteBtn"]'
                     
                     print(form)
-                    deletebutton=driver.find_element(By.XPATH,xpath)
-                    deletebutton.click()
+                    try:
+                        deletebutton=driver.find_element(By.XPATH,xpath)
+                        deletebutton.click()
+                    except:
+                        print("Skipping")
 
                     # class="ui delete modal front transition visible active"
                     page_source = driver.page_source
                     soup1 = BeautifulSoup(page_source,features="html.parser")
                     yes = driver.find_element(By.CSS_SELECTOR,".ui.basic.button.ok")
-                    yes.click()
+                    try:
+                        yes.click()
+                    except:
+                        print("Skipping")
 
 def image():
     page_source = driver.page_source

@@ -18,18 +18,22 @@ def create_webdriver():
     try:
         # Try creating a Chrome webdriver
         chrome_options = Options()
-        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("headless")
         return webdriver.Chrome(options=chrome_options)
     except:
         try:
             # Try creating a Firefox webdriver
             firefox_options = webdriver.FirefoxOptions()
-            firefox_options.add_argument("--start-maximized")
+            firefox_options.add_argument("headless") 
             return webdriver.Firefox(options=firefox_options)
         except:
             try:
+                from selenium.webdriver.edge.options import Options as EdgeOptions
                 # Try creating an Edge webdriver
-                return webdriver.Edge(r"msedgedriver.exe")
+                options = EdgeOptions()
+                options.use_chromium = True
+                options.add_argument("headless")
+                return webdriver.Edge(options=options)
             except:
                 raise Exception("No suitable browser found")
 
@@ -56,6 +60,15 @@ def del_icon():
     soup = BeautifulSoup(page_source, features="html.parser")
     file_to_open = open("before_delete.txt",'w')
     file_to_open.close()
+    ui_cards = soup.findall(_class_ = 'ui two doubling cards')
+    # print(ui_cards)
+    for card in ui_cards:
+        links = card.find_all("form")
+        if links is not None:
+            for i in links:
+                with open('before_delete.txt','a') as testing:
+                    testing.write(str(i)+"///")
+                    
     ui_cards = soup.find_all(class_ = 'ui cards')
     # print(ui_cards)
     for card in ui_cards:

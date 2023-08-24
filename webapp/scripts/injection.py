@@ -190,7 +190,7 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
             print(url2)
             if url2==f"{loginurl}":
                 trypass(password,loginfield,username,edgeBrowser)
-                sleep(1)
+                sleep(0.5)
                 print('fail')
                 data=[url,payload,'fail']
                 print(data)
@@ -309,7 +309,7 @@ def injection(edgeBrowser,payload,url,username,password,loginfield,loginurl):
                     clcik=field.find_element(By.CLASS_NAME,"item")
                     #Select the first option
                     if clcik.is_displayed():
-                        sleep(1)
+                        sleep(0.5)
                         clcik.click()
             if dates!=[]:
                  for i in dates:
@@ -469,7 +469,30 @@ options = Options()
 options.use_chromium = True
 options.add_argument("headless")
 
-edgeBrowser = webdriver.Edge()
+def create_webdriver():
+    try:
+        # Try creating a Chrome webdriver
+        chrome_options = Options()
+        chrome_options.add_argument("headless")
+        return webdriver.Chrome(options=chrome_options)
+    except:
+        try:
+            # Try creating a Firefox webdriver
+            firefox_options = webdriver.FirefoxOptions()
+            firefox_options.add_argument("headless") 
+            return webdriver.Firefox(options=firefox_options)
+        except:
+            try:
+                from selenium.webdriver.edge.options import Options as EdgeOptions
+                # Try creating an Edge webdriver
+                options = EdgeOptions()
+                options.use_chromium = True
+                options.add_argument("headless")
+                return webdriver.Edge(options=options)
+            except:
+                raise Exception("No suitable browser found")
+
+edgeBrowser = create_webdriver()
 # This is the step for maximizing browser window
 #edgeBrowser.maximize_window()
 #edgeBrowser.minimize_window()
