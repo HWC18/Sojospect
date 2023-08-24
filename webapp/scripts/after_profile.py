@@ -159,6 +159,12 @@ def personal_details():
             sampleElement.clear()
             sampleElement.send_keys(f"{payload}")
             sleep(1)
+        else:
+            payload = name[i]
+            sampleElement = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, inputfield[i])))
+            sampleElement.send_keys(f"123A")
+            sleep(1)
 
     #Submit the form to test payload
     submit=driver.find_element(By.CSS_SELECTOR,".ui.right.floated.primary.button")
